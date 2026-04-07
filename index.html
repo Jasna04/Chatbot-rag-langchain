@@ -1,112 +1,65 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>SUPER✦NOVA 💬</title>
+from fastapi import FastAPI
+from pydantic import BaseModel
+import os
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-    }
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import RetrievalQA
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
 
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background-image: url("/static/chatbot-bg.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
 
-    .chat-header {
-      padding: 12px;
-      font-weight: bold;
-      border-bottom: 1px solid #ddd;
-      background: rgba(255, 255, 255, 0.95);
-    }
+# ==============================
+# APP SETUP
+# ==============================
 
-    #chat {
-      flex: 1;
-      padding: 12px;
-      overflow-y: auto;
-      background: rgba(255, 255, 255, 0.85);
-    }
+app = FastAPI()
 
-    .chat-input {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      background: rgba(255, 255, 255, 0.95);
-    }
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-    .chat-input input {
-      flex: 1;
-      padding: 8px;
-      font-size: 14px;
-    }
+# Initialize LLM
+llm = ChatOpenAI(
+    model="gpt-4",
+    temperature=0.3,
+    openai_api_key=OPENAI_API_KEY
+)
 
-    .chat-input button {
-      margin-left: 8px;
-      padding: 8px 16px;
-      cursor: pointer;
-    }
-  </style>
-</head>
+# ==============================
+# RAG KNOWLEDGE BASE
+# ==============================
 
-<body>
-  <div class="chat-container">
+texts = [
+    "This chatbot helps users with product queries.",
+    "You can ask about features, pricing, and usage.",
+    "We provide onboarding and customer support."
+]
 
-    <div class="chat-header">SUPER✦NOVA 💬</div>
+vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings())
+retriever = vectorstore.as_retriever()
 
-    <div id="chat"></div>
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever
+)
 
-    <div class="chat-input">
-      <input id="input" placeholder="Type a message" />
-      <button onclick="send()">Send</button>
-    </div>
+# ==============================
+# REQUEST MODEL
+# ==============================
 
-  </div>
+class ChatRequest(BaseModel):
+    message: str
 
-  <!-- ✅ SCRIPT MUST BE HERE -->
-  <script>
-    // 🔑 Detect site from iframe URL
-    const SITE =
-      new URLSearchParams(window.location.search).get("site") || "default";
+# ==============================
+# ROUTES
+# ==============================
 
-    const chat = document.getElementById("chat");
+@app.get("/")
+def home():
+    return {"message": "AI Chatbot is running 🚀"}
 
-    // Greeting message
-    window.onload = () => {
-      chat.innerHTML += `
-        <p><b>Bot:</b> 👋 Hello! I’m your AI assistant. How can I help you today?</p>
-      `;
-    };
-
-    async function send() {
-      const input = document.getElementById("input");
-      const message = input.value.trim();
-      if (!message) return;
-
-      chat.innerHTML += `<p><b>You:</b> ${message}</p>`;
-
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: message,
-          site: SITE   // ✅ THIS is what connects the right knowledge base
-        })
-      });
-
-      const data = await res.json();
-      chat.innerHTML += `<p><b>Bot:</b> ${data.reply}</p>`;
-
-      input.value = "";
-      chat.scrollTop = chat.scrollHeight;
-    }
-  </script>
-</body>
-</html>
+@app.post("/chat")
+def chat(req: ChatRequest):
+    try:
+        response = qa_chain.run(req.message)
+        return {"reply": response}
+    except Exception as e:
+        return {"reply": "Something went wrong"}
