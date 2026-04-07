@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SUPER✦NOVA 💬</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-image: url("/static/chatbot-bg.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .chat-header {
+      padding: 12px;
+      font-weight: bold;
+      border-bottom: 1px solid #ddd;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    #chat {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .chat-input button {
+      margin-left: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-container">
+
+    <div class="chat-header">SUPER✦NOVA 💬</div>
+
+    <div id="chat"></div>
+
+    <div class="chat-input">
+      <input id="input" placeholder="Type a message" />
+      <button onclick="send()">Send</button>
+    </div>
+
+  </div>
+
+  <!-- ✅ SCRIPT MUST BE HERE -->
+  <script>
+    // 🔑 Detect site from iframe URL
+    const SITE =
+      new URLSearchParams(window.location.search).get("site") || "default";
+
+    const chat = document.getElementById("chat");
+
+    // Greeting message
+    window.onload = () => {
+      chat.innerHTML += `
+        <p><b>Bot:</b> 👋 Hello! I’m your AI assistant. How can I help you today?</p>
+      `;
+    };
+
+    async function send() {
+      const input = document.getElementById("input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      chat.innerHTML += `<p><b>You:</b> ${message}</p>`;
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: message,
+          site: SITE   // ✅ THIS is what connects the right knowledge base
+        })
+      });
+
+      const data = await res.json();
+      chat.innerHTML += `<p><b>Bot:</b> ${data.reply}</p>`;
+
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
