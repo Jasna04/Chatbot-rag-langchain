@@ -1,65 +1,173 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import os
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pet Pals</title>
 
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #c40000, #ff6b6b);
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      padding: 40px 20px;
+      background:
+        linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.4)),
+        url('https://plus.unsplash.com/premium_photo-1700838996339-de3bd9663344')
+        center/cover no-repeat;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      opacity: 0.95;
+    }
+
+    .ornaments {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      font-size: 2.5rem;
+      margin: 30px 0;
+    }
+
+    /* Shop Section */
+    .shop-section {
+      background: white;
+      color: #b30000;
+      padding: 50px 20px;
+      border-radius: 30px 30px 0 0;
+    }
+
+    .shop-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .shop-section p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+
+    .cta {
+      display: inline-block;
+      background: #b30000;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .cta:hover {
+      background: #8f0000;
+    }
 
 
-# ==============================
-# APP SETUP
-# ==============================
 
-app = FastAPI()
+    /* Footer */
+    footer {
+      padding: 40px 20px;
+      font-size: 0.9rem;
+      opacity: 0.95;
+      background:
+        linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.45)),
+        url('https://plus.unsplash.com/premium_photo-1700838996339-de3bd9663344')
+        center/cover no-repeat;
+    }
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    /* Chatbot */
+    .chatbot-container {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 380px;
+      height: 600px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      z-index: 9999;
+      display: none;
+      background: white;
+    }
 
-# Initialize LLM
-llm = ChatOpenAI(
-    model="gpt-4",
-    temperature=0.3,
-    openai_api_key=OPENAI_API_KEY
-)
+    /* Chat button */
+    .chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #b000;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 15px 22px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      z-index: 10000;
+    }
 
-# ==============================
-# RAG KNOWLEDGE BASE
-# ==============================
+    .chat-toggle:hover {
+      background: #8f0000;
+    }
 
-texts = [
-    "This chatbot helps users with product queries.",
-    "You can ask about features, pricing, and usage.",
-    "We provide onboarding and customer support."
-]
+    /* Santa helper message */
+    .santa-message {
+      position: fixed;
+      bottom: 150px;
+      right: 20px;
+      background: white;
+      color: #b30000;
+      padding: 12px 18px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      display: none;
+      z-index: 9999;
+    }
+  </style>
 
-vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings())
-retriever = vectorstore.as_retriever()
 
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever
-)
+  <!-- Zapier Chatbot -->
+  <div class="chatbot-container" id="chatbot">
+  <iframe
+    src="https://ai-chatbot-maik.onrender.com?site=christmas"
+    width="100%"
+    height="100%"
+    style="border:none;"
+    allow="clipboard-write *">
+  </iframe>
+</div>
 
-# ==============================
-# REQUEST MODEL
-# ==============================
+  <!-- Chat logic -->
+  <script>
+    const toggleBtn = document.getElementById("chatToggle");
+    const chatbot = document.getElementById("chatbot");
+    const santaMessage = document.getElementById("santaMessage");
 
-class ChatRequest(BaseModel):
-    message: str
+    toggleBtn.addEventListener("click", () => {
+      const isOpen = chatbot.style.display === "block";
 
-# ==============================
-# ROUTES
-# ==============================
+      chatbot.style.display = isOpen ? "none" : "block";
+      santaMessage.style.display = isOpen ? "none" : "block";
 
-@app.get("/")
-def home():
-    return {"message": "AI Chatbot is running 🚀"}
+      toggleBtn.textContent = isOpen
+        ? "Ask Pet Pal’s Helper"
+        : "Close Chat";
+    });
+  </script>
 
-@app.post("/chat")
-def chat(req: ChatRequest):
-    try:
-        response = qa_chain.run(req.message)
-        return {"reply": response}
-    except Exception as e:
-        return {"reply": "Something went wrong"}
+</body>
+</html>
