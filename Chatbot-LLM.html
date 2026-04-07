@@ -11,10 +11,8 @@
       background: linear-gradient(to bottom, #c40000, #ff6b6b);
       color: white;
       text-align: center;
-      overflow-x: hidden;
     }
 
-    /* Header */
     header {
       padding: 40px 20px;
       background:
@@ -25,66 +23,13 @@
 
     header h1 {
       font-size: 3rem;
-      margin-bottom: 10px;
     }
 
-    header p {
-      font-size: 1.2rem;
-      opacity: 0.95;
-    }
-
-    .ornaments {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      font-size: 2.5rem;
-      margin: 30px 0;
-    }
-
-    /* Shop Section */
     .shop-section {
       background: white;
       color: #b30000;
       padding: 50px 20px;
       border-radius: 30px 30px 0 0;
-    }
-
-    .shop-section h2 {
-      font-size: 2.2rem;
-      margin-bottom: 10px;
-    }
-
-    .shop-section p {
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-    }
-
-    .cta {
-      display: inline-block;
-      background: #b30000;
-      color: white;
-      padding: 15px 30px;
-      border-radius: 30px;
-      text-decoration: none;
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
-
-    .cta:hover {
-      background: #8f0000;
-    }
-
-
-
-    /* Footer */
-    footer {
-      padding: 40px 20px;
-      font-size: 0.9rem;
-      opacity: 0.95;
-      background:
-        linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.45)),
-        url('https://plus.unsplash.com/premium_photo-1700838996339-de3bd9663344')
-        center/cover no-repeat;
     }
 
     /* Chatbot */
@@ -97,33 +42,25 @@
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-      z-index: 9999;
       display: none;
       background: white;
+      z-index: 9999;
     }
 
-    /* Chat button */
     .chat-toggle {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #b000;
+      background: #b30000;
       color: white;
       border: none;
       border-radius: 30px;
       padding: 15px 22px;
       font-size: 1.1rem;
-      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
       z-index: 10000;
     }
 
-    .chat-toggle:hover {
-      background: #8f0000;
-    }
-
-    /* Santa helper message */
     .santa-message {
       position: fixed;
       bottom: 150px;
@@ -132,26 +69,45 @@
       color: #b30000;
       padding: 12px 18px;
       border-radius: 16px;
-      font-size: 0.95rem;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
       display: none;
       z-index: 9999;
     }
   </style>
+</head>
 
+<body>
 
-  <!-- Zapier Chatbot -->
+  <header>
+    <h1>Pet Pals</h1>
+    <p>Your festive shopping companion</p>
+  </header>
+
+  <div class="shop-section">
+    <h2>Shop Now</h2>
+    <p>Explore our festive collection</p>
+  </div>
+
+  <!-- Chat button -->
+  <button class="chat-toggle" id="chatToggle">
+    Ask Pet Pal’s Helper
+  </button>
+
+  <!-- Santa message -->
+  <div class="santa-message" id="santaMessage">
+    Need help? Ask me anything!
+  </div>
+
+  <!-- Chatbot -->
   <div class="chatbot-container" id="chatbot">
-  <iframe
-    src="https://ai-chatbot-maik.onrender.com?site=christmas"
-    width="100%"
-    height="100%"
-    style="border:none;"
-    allow="clipboard-write *">
-  </iframe>
-</div>
+    <iframe
+      src="https://ai-chatbot-maik.onrender.com?site=christmas"
+      width="100%"
+      height="100%"
+      style="border:none;">
+    </iframe>
+  </div>
 
-  <!-- Chat logic -->
+  <!-- Script (MUST be after elements) -->
   <script>
     const toggleBtn = document.getElementById("chatToggle");
     const chatbot = document.getElementById("chatbot");
