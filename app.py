@@ -45,8 +45,10 @@ texts = [
     "We provide chatbot and AI-based automation solutions."
 ]
 
-vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings())
-retriever = vectorstore.as_retriever()
+vectorstore = Chroma(
+    persist_directory="db",
+    embedding_function=OpenAIEmbeddings()
+)
 
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
