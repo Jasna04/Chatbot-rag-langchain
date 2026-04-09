@@ -1,37 +1,77 @@
-import streamlit as st
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import os
+
 from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import FAISS
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
 
-# Load vector DB
-embeddings = OpenAIEmbeddings()
-db = FAISS.load_local("faiss_index", embeddings)
+# ==============================
+# APP SETUP
+# ==============================
 
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# ==============================
 # LLM
+# ==============================
+
 llm = ChatOpenAI(
-    model_name="gpt-4o-mini",
-    temperature=0
+    model="gpt-4",
+    temperature=0.2,
+    openai_api_key=OPENAI_API_KEY
 )
 
-# RAG Chain
-qa = RetrievalQA.from_chain_type(
+# ==============================
+# RAG KNOWLEDGE BASE
+# ==============================
+
+texts = [
+    "This website provides web services and digital solutions.",
+    "We help businesses build scalable products and platforms.",
+    "Our services include product management, AI solutions, and analytics.",
+    "You can contact us for consulting and support.",
+    "We provide chatbot and AI-based automation solutions."
+]
+
+vectorstore = Chroma.from_texts(texts, OpenAIEmbeddings())
+retriever = vectorstore.as_retriever()
+
+qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
-    retriever=db.as_retriever(),
-    return_source_documents=True
+    retriever=retriever
 )
 
-# UI
-st.title("🤖 RAG Chatbot (LangChain)")
+# ==============================
+# REQUEST MODEL
+# ==============================
 
-query = st.text_input("Ask something:")
+class ChatRequest(BaseModel):
+    message: str
 
-if query:
-    result = qa({"query": query})
-    
-    st.write("### 💬 Answer:")
-    st.write(result["result"])
+# ==============================
+# ROUTES
+# ==============================
 
-    st.write("### 📚 Sources:")
-    for doc in result["source_documents"]:
-        st.write(doc.metadata)
+@app.get("/")
+def home():
+    return {"message": "Chatbot API is running 🚀"}
+
+@app.post("/chat")
+def chat(req: ChatRequest):
+    try:
+        response = qa_chain.run(req.message)
+        return {"reply": response}
+    except Exception as e:
+        return {"reply": "Something went wrong"}
