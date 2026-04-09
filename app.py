@@ -49,6 +49,8 @@ vectorstore = Chroma(
     embedding_function=OpenAIEmbeddings()
 )
 
+retriever = vectorstore.as_retriever()
+
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     retriever=retriever
