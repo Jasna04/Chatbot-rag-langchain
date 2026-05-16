@@ -1,5 +1,5 @@
 from langchain_community.document_loaders import TextLoader
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 
 # Load file
@@ -10,8 +10,10 @@ documents = loader.load()
 embedding = OpenAIEmbeddings()
 
 # Store in vector DB
-db = Chroma.from_documents(documents, embedding, persist_directory="db")
-
-db.persist()
+db = Chroma.from_documents(
+    documents,
+    embedding,
+    persist_directory="db"
+)
 
 print("✅ Data ingested successfully")
