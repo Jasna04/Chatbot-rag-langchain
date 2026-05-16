@@ -12,21 +12,13 @@ app = FastAPI()
 class ChatRequest(BaseModel):
     message: str
 
-# Sample knowledge base
-texts = [
-    "This website provides web services and digital solutions.",
-    "We help businesses build scalable products and platforms.",
-    "Our services include product management, AI solutions, and analytics."
-]
-
 # Embeddings
 embedding = OpenAIEmbeddings()
 
 # Vector DB
-vectorstore = Chroma.from_texts(
-    texts=texts,
-    embedding=embedding,
-    persist_directory="db"
+vectorstore = Chroma
+persist_directory="db"
+embedding_function=embedding
 )
 
 # Retriever
