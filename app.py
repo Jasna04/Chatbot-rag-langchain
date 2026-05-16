@@ -72,9 +72,11 @@ def home():
     return {"message": "Chatbot API is running 🚀"}
 
 @app.post("/chat")
-def chat(req: ChatRequest):
+def chat(request: ChatRequest):
     try:
-        response = qa_chain.run(req.message)
+        response = qa.run(request.message)
         return {"reply": response}
+
     except Exception as e:
-        return {"reply": "Something went wrong"}
+        print("ERROR:", e)
+        return {"reply": str(e)}
