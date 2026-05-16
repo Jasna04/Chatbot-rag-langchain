@@ -21,8 +21,7 @@ vectorstore = Chroma(
     embedding_function=embedding
 )
 
-# ADD TO VECTOR DB
-vectorstore.add_documents(docs)
+
 
 # SAVE
 vectorstore.persist()
