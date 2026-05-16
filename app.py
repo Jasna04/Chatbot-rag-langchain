@@ -5,20 +5,20 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 
-# Create FastAPI app
+# FastAPI app
 app = FastAPI()
 
-# Request model
+# Request schema
 class ChatRequest(BaseModel):
     message: str
 
 # Embeddings
 embedding = OpenAIEmbeddings()
 
-# Vector DB
-vectorstore = Chroma
-persist_directory="db"
-embedding_function=embedding
+# LOAD existing vector DB
+vectorstore = Chroma(
+    persist_directory="db",
+    embedding_function=embedding
 )
 
 # Retriever
@@ -30,7 +30,7 @@ llm = ChatOpenAI(
     temperature=0
 )
 
-# QA Chain
+# QA chain
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     retriever=retriever
@@ -41,7 +41,7 @@ qa_chain = RetrievalQA.from_chain_type(
 def home():
     return {"message": "Chatbot API running 🚀"}
 
-# Chat route
+# Chat endpoint
 @app.post("/chat")
 def chat(request: ChatRequest):
     try:
