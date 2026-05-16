@@ -21,8 +21,16 @@ vectorstore = Chroma(
     embedding_function=embedding
 )
 
+# ADD TO VECTOR DB
+vectorstore.add_documents(docs)
+
+# SAVE
+vectorstore.persist()
+
+print("New data added successfully")
+
 # Retriever
-retriever = vectorstore.as_retriever()
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
 # LLM
 llm = ChatOpenAI(
