@@ -1,83 +1,45 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import os
-
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import Chroma
-
-# ==============================
-# APP SETUP
-# ==============================
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-# ==============================
-# LLM
-# ==============================
-
-llm = ChatOpenAI(
-    model="gpt-3.5-turbo",
-    temperature=0.2,
-    openai_api_key=OPENAI_API_KEY
-)
-
-# ==============================
-# RAG KNOWLEDGE BASE
-# ==============================
+from langchain.chains import RetrievalQA
 
 texts = [
     "This website provides web services and digital solutions.",
     "We help businesses build scalable products and platforms.",
-    "Our services include product management, AI solutions, and analytics.",
-    "You can contact us for consulting and support.",
-    "We provide chatbot and AI-based automation solutions."
+    "Our services include product management, AI solutions, and analytics."
 ]
 
-vectorstore = Chroma(
-    persist_directory="db",
-    embedding_function=OpenAIEmbeddings()
+embedding = OpenAIEmbeddings()
+
+vectorstore = Chroma.from_texts(
+    texts=texts,
+    embedding=embedding,
+    persist_directory="db"
 )
 
 retriever = vectorstore.as_retriever()
+
+llm = ChatOpenAI(
+    model="gpt-3.5-turbo",
+    temperature=0
+)
 
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     retriever=retriever
 )
-
-# ==============================
-# REQUEST MODEL
-# ==============================
-
-class ChatRequest(BaseModel):
-    message: str
-
-# ==============================
-# ROUTES
-# ==============================
-
-@app.get("/")
-def home():
-    return {"message": "Chatbot API is running 🚀"}
-
 @app.post("/chat")
 def chat(request: ChatRequest):
     try:
-        response = qa_chain.invoke({"query": request.message})
-        
-        return {"reply": response["result"]}
+        response = qa_chain.invoke({
+            "query": request.message
+        })
+
+        return {
+            "reply": response["result"]
+        }
 
     except Exception as e:
-        print("ERROR:", e)
+        import traceback
+        traceback.print_exc()
+
         return {"reply": str(e)}
