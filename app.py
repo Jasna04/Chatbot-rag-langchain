@@ -27,7 +27,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # ==============================
 
 llm = ChatOpenAI(
-    model="gpt-4",
+    model="gpt-3.5-turbo",
     temperature=0.2,
     openai_api_key=OPENAI_API_KEY
 )
