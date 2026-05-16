@@ -74,8 +74,9 @@ def home():
 @app.post("/chat")
 def chat(request: ChatRequest):
     try:
-        response = qa_chain.run(request.message)
-        return {"reply": response}
+        response = qa_chain.invoke({"query": request.message})
+        
+        return {"reply": response["result"]}
 
     except Exception as e:
         print("ERROR:", e)
