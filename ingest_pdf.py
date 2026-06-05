@@ -4,7 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 
 # Load PDF
-loader = PyPDFLoader("pdfs/petpals.pdf")
+loader = PyPDFLoader("data/PetPals_Store_Catalog_Rs_Format.pdf")
 documents = loader.load()
 
 # Split
